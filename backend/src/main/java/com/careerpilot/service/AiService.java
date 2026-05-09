@@ -20,13 +20,21 @@ public class AiService {
     @Value("${gemini.api.key:}")
     private String geminiKey;
 
+    @Value("${groq.api.key:}")
+    private String groqKey;
+
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
     // ─── Primary entry point ────────────────────────────────────────────────────
 
     public String chat(String userMessage, String systemPrompt) {
-        // Try Gemini first (free tier available)
+        // Try Groq first (fast and cost-effective)
+        if (groqKey != null && !groqKey.isBlank()) {
+            try { return callGroq(userMessage, systemPrompt); }
+            catch (Exception e) { log.warn("Groq failed, trying Gemini: {}", e.getMessage()); }
+        }
+        // Try Gemini
         if (geminiKey != null && !geminiKey.isBlank()) {
             try { return callGemini(userMessage, systemPrompt); }
             catch (Exception e) { log.warn("Gemini failed, trying OpenAI: {}", e.getMessage()); }
@@ -66,6 +74,41 @@ public class AiService {
         Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
         List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
         return (String) parts.get(0).get("text");
+    }
+
+    // ─── Groq API ───────────────────────────────────────────────────────────────
+
+    private String callGroq(String userMessage, String systemPrompt) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(groqKey);
+
+        Map<String, Object> body = Map.of(
+            "model", "meta-llama/llama-4-scout-17b-16e-instruct",
+            "max_tokens", 1500,
+            "messages", List.of(
+                Map.of("role", "system", "content", systemPrompt),
+                Map.of("role", "user", "content", userMessage)
+            )
+        );
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+        try {
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                "https://api.groq.com/openai/v1/chat/completions", entity, Map.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
+                if (choices != null && !choices.isEmpty()) {
+                    Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
+                    return (String) message.get("content");
+                }
+            }
+            throw new RuntimeException("Invalid response from Groq API");
+        } catch (Exception e) {
+            log.error("Groq API call failed: {}", e.getMessage());
+            throw e;
+        }
     }
 
     // ─── OpenAI API ─────────────────────────────────────────────────────────────
@@ -124,18 +167,27 @@ public class AiService {
     }
 
     public Map<String, Object> analyzeResume(String resumeText) {
+        log.info("Analyzing resume with text length: {}", resumeText != null ? resumeText.length() : 0);
+        if ((openAiKey == null || openAiKey.isBlank()) && (geminiKey == null || geminiKey.isBlank()) && (groqKey == null || groqKey.isBlank())) {
+            throw new RuntimeException("AI API keys not configured. Please set GROQ_API_KEY, OPENAI_API_KEY, or GEMINI_API_KEY environment variables.");
+        }
         String prompt = "Analyze this resume thoroughly. Return JSON with exactly these fields: " +
             "atsScore (int 0-100), overallScore (int 0-100), " +
             "sections (object: contact, summary, experience, skills, education, formatting — each int 0-100), " +
             "missingKeywords (string array), presentKeywords (string array), " +
             "suggestions (array of objects with 'type' (critical/warning/info) and 'text'), " +
+            "jobMatches (array of objects with 'title', 'company', and 'match' int 0-100), " +
             "topSkills (array of objects with 'skill' and 'value' int). Return ONLY valid JSON.";
         String response = chat(prompt + "\n\nResume:\n" + resumeText,
             "You are an expert ATS resume analyzer. Return only valid JSON.");
+        log.info("AI response: {}", response);
         try {
-            return objectMapper.readValue(extractJsonObject(response), Map.class);
+            String jsonStr = extractJsonObject(response);
+            log.info("Extracted JSON: {}", jsonStr);
+            return objectMapper.readValue(jsonStr, Map.class);
         } catch (Exception e) {
-            return getDefaultResumeAnalysis();
+            log.error("Failed to parse resume analysis JSON: {}", e.getMessage());
+            throw new RuntimeException("Failed to analyze resume: " + e.getMessage());
         }
     }
 

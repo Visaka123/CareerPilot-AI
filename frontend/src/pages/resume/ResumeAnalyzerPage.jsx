@@ -63,11 +63,35 @@ export default function ResumeAnalyzerPage() {
       formData.append('file', file)
       const uploadRes = await resumeService.upload(formData)
       const analysisRes = await resumeService.analyze(uploadRes.data.id)
-      setAnalysis(analysisRes.data)
-    } catch {
-      // Use mock data for demo
-      await new Promise(r => setTimeout(r, 2500))
-      setAnalysis(MOCK_ANALYSIS)
+
+      // Ensure all required fields have defaults
+      const data = analysisRes.data || {}
+      const processedAnalysis = {
+        atsScore: data.atsScore || 0,
+        overallScore: data.overallScore || 0,
+        sections: data.sections || {
+          contact: 0,
+          summary: 0,
+          experience: 0,
+          skills: 0,
+          education: 0,
+          formatting: 0,
+        },
+        missingKeywords: data.missingKeywords || [],
+        presentKeywords: data.presentKeywords || [],
+        suggestions: data.suggestions || [],
+        jobMatches: data.jobMatches || [],
+        topSkills: data.topSkills || [],
+      }
+
+      console.log('Raw API response:', analysisRes.data)
+      console.log('Processed analysis:', processedAnalysis)
+      console.log('ATS Score:', processedAnalysis.atsScore)
+      console.log('Overall Score:', processedAnalysis.overallScore)
+      setAnalysis(processedAnalysis)
+    } catch (error) {
+      console.error('Resume analysis failed:', error)
+      toast.error('Failed to analyze resume. Please try again.')
     } finally {
       setAnalyzing(false)
     }

@@ -21,6 +21,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.poi.hwpf.HWPFDocument;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+
 @RestController
 @RequestMapping("/api/resume")
 @RequiredArgsConstructor
@@ -44,10 +51,13 @@ public class ResumeController {
             Path filePath = dir.resolve(filename);
             Files.copy(file.getInputStream(), filePath);
 
+            String extractedText = extractText(filePath.toString(), file.getOriginalFilename());
+
             Resume resume = Resume.builder()
                     .user(user)
                     .fileName(file.getOriginalFilename())
                     .filePath(filePath.toString())
+                    .extractedText(extractedText)
                     .build();
             resumeRepository.save(resume);
             return ResponseEntity.ok(ApiResponse.success(Map.of("id", resume.getId(), "fileName", resume.getFileName())));
@@ -86,5 +96,43 @@ public class ResumeController {
                 .filter(r -> r.getUser().getId().equals(user.getId()))
                 .ifPresent(resumeRepository::delete);
         return ResponseEntity.ok(ApiResponse.success("Deleted", null));
+    }
+
+    private String extractText(String filePath, String fileName) {
+        try {
+            String extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+            switch (extension) {
+                case "pdf":
+                    return extractFromPDF(filePath);
+                case "doc":
+                    return extractFromDOC(filePath);
+                case "docx":
+                    return extractFromDOCX(filePath);
+                default:
+                    return "";
+            }
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private String extractFromPDF(String filePath) throws Exception {
+        try (PDDocument document = Loader.loadPDF(new File(filePath))) {
+            PDFTextStripper stripper = new PDFTextStripper();
+            return stripper.getText(document);
+        }
+    }
+
+    private String extractFromDOC(String filePath) throws Exception {
+        try (HWPFDocument document = new HWPFDocument(Files.newInputStream(Paths.get(filePath)))) {
+            return document.getDocumentText();
+        }
+    }
+
+    private String extractFromDOCX(String filePath) throws Exception {
+        try (XWPFDocument document = new XWPFDocument(Files.newInputStream(Paths.get(filePath)))) {
+            XWPFWordExtractor extractor = new XWPFWordExtractor(document);
+            return extractor.getText();
+        }
     }
 }
