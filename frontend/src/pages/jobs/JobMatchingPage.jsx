@@ -52,6 +52,7 @@ export default function JobMatchingPage() {
   const [syncing, setSyncing] = useState(false)
   const [selectedJob, setSelectedJob] = useState(null)
   const [applying, setApplying] = useState(false)
+  const [autoApplying, setAutoApplying] = useState(false)
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(true)
   const searchTimer = useRef(null)
@@ -68,7 +69,7 @@ export default function JobMatchingPage() {
       }
       const res = search
         ? await jobService.search(params)
-        : await jobService.getAll(params)
+        : await jobService.getRecommended(params)
 
       const data = Array.isArray(res.data) ? res.data : res.data?.content || []
       if (reset) {
@@ -156,6 +157,18 @@ export default function JobMatchingPage() {
     }
   }
 
+  const startAutoApply = async () => {
+    setAutoApplying(true)
+    try {
+      const result = await applicationService.applyAllJobs()
+      toast.success(`Auto-applied to ${result.length} jobs!`)
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to start auto-apply')
+    } finally {
+      setAutoApplying(false)
+    }
+  }
+
   const getSkillTags = (job) => {
     try {
       if (Array.isArray(job.requiredSkills)) return job.requiredSkills
@@ -173,9 +186,19 @@ export default function JobMatchingPage() {
             {loading ? 'Loading jobs...' : `${jobs.length} jobs found`}
           </p>
         </div>
-        <Button variant="secondary" size="sm" onClick={syncJobs} loading={syncing}>
-          <RefreshCw size={14} /> Sync Jobs
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold"
+            size="sm"
+            onClick={startAutoApply}
+            loading={autoApplying}
+          >
+            <Zap size={14} /> Start Auto Apply
+          </Button>
+          <Button variant="secondary" size="sm" onClick={syncJobs} loading={syncing}>
+            <RefreshCw size={14} /> Sync Jobs
+          </Button>
+        </div>
       </div>
 
       {/* Search */}
@@ -379,8 +402,8 @@ export default function JobMatchingPage() {
                 )}
 
                 <div className="flex gap-2">
-                  <Button className="flex-1" onClick={() => applyToJob(selectedJob)} loading={applying}>
-                    <Zap size={15} /> Apply & Track
+                  <Button variant="outline" onClick={() => applyToJob(selectedJob)} loading={applying}>
+                    <Zap size={15} /> Manual Apply
                   </Button>
                   {selectedJob.applyUrl && (
                     <Button variant="secondary" onClick={() => window.open(selectedJob.applyUrl, '_blank', 'noopener')}>

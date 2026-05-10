@@ -33,6 +33,9 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<AuthDto.UserDto>> me(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            return ResponseEntity.status(401).body(ApiResponse.error("User not authenticated"));
+        }
         return ResponseEntity.ok(ApiResponse.success(authService.getProfile(user)));
     }
 

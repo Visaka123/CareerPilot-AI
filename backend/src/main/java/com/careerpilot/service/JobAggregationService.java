@@ -85,11 +85,11 @@ public class JobAggregationService {
                     if (tagsObj instanceof List) tags = (List<String>) tagsObj;
 
                     Job job = Job.builder()
-                        .title(title)
-                        .company(company)
+                        .title(cleanText(title))
+                        .company(cleanText(company))
                         .location(String.valueOf(item.getOrDefault("location", "Remote")))
                         .type("Remote")
-                        .description(stripHtml(String.valueOf(item.getOrDefault("description", ""))))
+                        .description(stripHtml(cleanText(String.valueOf(item.getOrDefault("description", "")))))
                         .requiredSkills(objectMapper.writeValueAsString(tags.stream().limit(8).toList()))
                         .applyUrl(String.valueOf(item.getOrDefault("url", "")))
                         .postedDate(formatPostedDate(item.get("date")))
@@ -133,11 +133,11 @@ public class JobAggregationService {
                     if (tagsObj instanceof List) tags = (List<String>) tagsObj;
 
                     Job job = Job.builder()
-                        .title(title)
-                        .company(company)
+                        .title(cleanText(title))
+                        .company(cleanText(company))
                         .location(String.valueOf(item.getOrDefault("location", "Remote")))
                         .type(Boolean.TRUE.equals(item.get("remote")) ? "Remote" : "On-site")
-                        .description(stripHtml(String.valueOf(item.getOrDefault("description", ""))))
+                        .description(stripHtml(cleanText(String.valueOf(item.getOrDefault("description", "")))))
                         .requiredSkills(objectMapper.writeValueAsString(tags.stream().limit(8).toList()))
                         .applyUrl(String.valueOf(item.getOrDefault("url", "")))
                         .postedDate("Recently")
@@ -253,5 +253,62 @@ public class JobAggregationService {
             } catch (Exception ignored) {}
         }
         return "Recently";
+    }
+
+    private String cleanText(String text) {
+        if (text == null || text.isBlank()) return text;
+
+        // Basic text cleaning
+        String cleaned = text.trim();
+
+        // Fix common misspellings or normalize
+        cleaned = cleaned.replaceAll("\\s+", " "); // Multiple spaces to single
+        cleaned = cleaned.replaceAll("[\\u00A0\\u2007\\u202F]", " "); // Non-breaking spaces
+
+        // Translate common German job terms to English
+        cleaned = translateGermanTerms(cleaned);
+
+        return cleaned;
+    }
+
+    private String translateGermanTerms(String text) {
+        // Common German job title translations
+        Map<String, String> translations = Map.ofEntries(
+            Map.entry("Fachinformatiker", "IT Specialist"),
+            Map.entry("Werkstudent", "Working Student"),
+            Map.entry("Masterand", "Master's Student"),
+            Map.entry("Verwaltungsmitarbeiter", "Administrative Assistant"),
+            Map.entry("Junior Consultant", "Junior Consultant"),
+            Map.entry("Tech-Lead", "Tech Lead"),
+            Map.entry("Werkstudent:in", "Working Student"),
+            Map.entry("für Anwendungsentwicklung", "for Application Development"),
+            Map.entry("im Bereich", "in the Field of"),
+            Map.entry("Qualitätsmanagement", "Quality Management"),
+            Map.entry("in der Physiotherapie", "in Physiotherapy"),
+            Map.entry("Produktmanagement", "Product Management"),
+            Map.entry("Techagentur", "Tech Agency"),
+            Map.entry("Founder's Associate", "Founder's Associate"),
+            Map.entry("KI & Softwareentwicklung", "AI & Software Development"),
+            Map.entry("IT-Entwicklung", "IT Development"),
+            Map.entry("Zukunft der Erneuerbaren Energie", "Future of Renewable Energy"),
+            Map.entry("Speicher & Wasserstoff", "Storage & Hydrogen"),
+            Map.entry("Content Sparring & Redaktion", "Content Sparring & Editing"),
+            Map.entry("Operational AI", "Operational AI"),
+            Map.entry("AI Engineering", "AI Engineering"),
+            Map.entry("Planung", "Planning")
+        );
+
+        String result = text;
+        for (Map.Entry<String, String> entry : translations.entrySet()) {
+            result = result.replaceAll("(?i)" + entry.getKey(), entry.getValue());
+        }
+
+        // Clean up gender markers (m/w/d, w/m/d, etc.)
+        result = result.replaceAll("\\s*\\([^)]*\\)\\s*", " ");
+
+        // Clean up extra spaces
+        result = result.replaceAll("\\s+", " ").trim();
+
+        return result;
     }
 }

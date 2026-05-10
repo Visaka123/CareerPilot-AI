@@ -45,6 +45,8 @@ export const applicationService = {
   getStats: () => api.get('/applications/stats'),
   getTimeline: (id) => api.get(`/applications/${id}/timeline`),
   addNote: (id, note) => api.post(`/applications/${id}/notes`, { note }),
+  applyJob: (jobId) => api.post(`/applications/apply/${jobId}`),
+  applyAllJobs: () => api.post('/applications/apply-all'),
 }
 
 export const interviewService = {

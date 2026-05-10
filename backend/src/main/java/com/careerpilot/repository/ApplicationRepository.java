@@ -25,4 +25,16 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     long countByUserIdAndAppliedDateBetween(@Param("userId") Long userId,
                                              @Param("start") LocalDateTime start,
                                              @Param("end") LocalDateTime end);
+
+    // Auto apply related queries
+    boolean existsByUserIdAndJobId(Long userId, Long jobId);
+
+    List<Application> findByUserIdAndJobId(Long userId, Long jobId);
+
+    @Query("SELECT a FROM Application a WHERE a.status IN ('FAILED', 'RETRYING') AND a.applicationType = 'AUTO'")
+    List<Application> findFailedAutoApplications();
+
+    @Query("SELECT COUNT(a) FROM Application a WHERE a.user.id = :userId AND a.status = :status AND a.applicationType = 'AUTO'")
+    long countByUserIdAndStatusAndApplicationType(@Param("userId") Long userId,
+                                                  @Param("status") Application.Status status);
 }

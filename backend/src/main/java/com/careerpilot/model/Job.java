@@ -42,6 +42,9 @@ public class Job {
     @Builder.Default
     private boolean active = true;
 
+    @Builder.Default
+    private Double matchScore = 0.0;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 }

@@ -1,8 +1,8 @@
 com\careerpilot\model\Job.class
+com\careerpilot\service\ApplicationService$1.class
 com\careerpilot\model\Application$ApplicationBuilder.class
 com\careerpilot\controller\ResumeController.class
 com\careerpilot\model\Notification$NotificationBuilder.class
-com\careerpilot\controller\AdminController.class
 com\careerpilot\security\JwtAuthFilter.class
 com\careerpilot\model\Job$JobBuilder.class
 com\careerpilot\service\AiService.class
@@ -32,7 +32,6 @@ com\careerpilot\repository\ResumeRepository.class
 com\careerpilot\controller\NotificationController.class
 com\careerpilot\model\User$Plan.class
 com\careerpilot\dto\AuthDto$RegisterRequest.class
-com\careerpilot\controller\ApplicationController.class
 com\careerpilot\repository\NotificationRepository.class
 com\careerpilot\model\Resume$ResumeBuilder.class
 com\careerpilot\model\CareerRoadmap$CareerRoadmapBuilder.class
@@ -45,7 +44,6 @@ com\careerpilot\dto\AuthDto$UserDto.class
 com\careerpilot\exception\AppException.class
 com\careerpilot\config\SecurityConfig.class
 com\careerpilot\service\ApplicationService.class
-com\careerpilot\controller\DashboardController.class
 com\careerpilot\dto\ApiResponse.class
 com\careerpilot\controller\JobController.class
 com\careerpilot\model\Notification.class
@@ -54,4 +52,3 @@ com\careerpilot\model\Application$Status.class
 com\careerpilot\dto\AuthDto$UpdateProfileRequest.class
 com\careerpilot\dto\AuthDto.class
 com\careerpilot\repository\JobRepository.class
-com\careerpilot\service\DashboardService.class
