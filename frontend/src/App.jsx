@@ -10,6 +10,7 @@ const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'))
 const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'))
 const ResumeAnalyzerPage = lazy(() => import('./pages/resume/ResumeAnalyzerPage'))
 const JobMatchingPage = lazy(() => import('./pages/jobs/JobMatchingPage'))
+const LiveMarketScanPage = lazy(() => import('./pages/jobs/LiveMarketScanPage'))
 const MockInterviewPage = lazy(() => import('./pages/interview/MockInterviewPage'))
 const ApplicationTrackerPage = lazy(() => import('./pages/tracker/ApplicationTrackerPage'))
 const CareerRoadmapPage = lazy(() => import('./pages/roadmap/CareerRoadmapPage'))
@@ -56,6 +57,7 @@ export default function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/resume" element={<ResumeAnalyzerPage />} />
             <Route path="/jobs" element={<JobMatchingPage />} />
+            <Route path="/jobs/live-scan" element={<LiveMarketScanPage />} />
             <Route path="/interview" element={<MockInterviewPage />} />
             <Route path="/tracker" element={<ApplicationTrackerPage />} />
             <Route path="/roadmap" element={<CareerRoadmapPage />} />

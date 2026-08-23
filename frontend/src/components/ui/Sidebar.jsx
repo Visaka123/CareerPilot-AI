@@ -14,6 +14,7 @@ const navItems = [
   { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/resume', icon: FileText, label: 'Resume Analyzer' },
   { path: '/jobs', icon: Briefcase, label: 'Job Matching' },
+  { path: '/jobs/live-scan', icon: Zap, label: 'Live Market Scan' },
   { path: '/interview', icon: MessageSquare, label: 'Mock Interview' },
   { path: '/tracker', icon: Target, label: 'App Tracker' },
   { path: '/roadmap', icon: Map, label: 'Career Roadmap' },

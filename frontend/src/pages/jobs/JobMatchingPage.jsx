@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -187,6 +188,11 @@ export default function JobMatchingPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Link to="/jobs/live-scan">
+            <Button variant="secondary" size="sm" className="border-primary-500/30 text-primary-300 hover:text-white">
+              <Zap size={14} className="text-amber-400" /> Live Market Scan
+            </Button>
+          </Link>
           <Button
             className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold"
             size="sm"

@@ -97,3 +97,10 @@ export const skillService = {
   getSalaryPrediction: (data) => api.post('/skills/salary-prediction', data),
   getGapAnalysis: (data) => api.post('/skills/gap-analysis', data),
 }
+
+export const scraperService = {
+  trigger: (params) => api.post('/scraper/trigger', null, { params }),
+  getJobs: (params) => api.get('/scraper/jobs', { params }),
+  getStatus: (collectorId = 'c_mt5qs76z2qeo1prcw6') => api.get(`/scraper/status/${collectorId}`),
+  getSkillDemand: () => api.get('/scraper/analytics/skills'),
+}
