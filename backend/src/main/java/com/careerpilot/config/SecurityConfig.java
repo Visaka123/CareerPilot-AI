@@ -54,6 +54,9 @@ public class SecurityConfig {
                         // Jobs APIs
                         .requestMatchers("/api/jobs/**").permitAll()
 
+                        // Scraper APIs
+                        .requestMatchers("/api/scraper/**").permitAll()
+
                         // Admin APIs
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 

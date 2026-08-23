@@ -1,0 +1,29 @@
+# Environment & Secrets
+.env
+*.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Maven & Build targets
+target/
+**/target/
+*.class
+maven.zip
+.mvn/
+
+# Node & Frontend
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.vite/
+**/.vite/
+
+# Temporary / Scratch Files
+test.json
+sample-scraped-output.json
+*.log
+.DS_Store
+Thumbs.db
