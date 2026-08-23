@@ -9,7 +9,34 @@ An AI-powered Personal Career Agent platform — production-ready SaaS applicati
 **Frontend:** React 19 + Vite, Tailwind CSS v4, Framer Motion, Recharts, Zustand, React Router v6, Axios  
 **Backend:** Spring Boot 3.2, Spring Security, JWT, JPA/Hibernate, MySQL  
 **AI:** OpenAI GPT-4o-mini / Gemini API integration  
-**Deployment:** Vercel (frontend) + Railway/Render (backend) + PlanetScale/Railway MySQL
+**Deployment:** Vercel (frontend) + Railway/Render (backend) + PlanetScale/Railway MySQL  
+**Scraper & Data Pipeline:** Bright Data Scraper Studio via `bdata` CLI (`Collector ID: c_mt5qs76z2qeo1prcw6`)
+
+---
+
+## 🚀 Bright Data Scraper Studio Integration (Hackathon Feature)
+
+CareerPilot AI features a **self-healing live job market scraper pipeline** built with **Bright Data Scraper Studio**:
+
+- **Target Site:** `https://www.python.org/jobs/` (Long-tail official Python job board with zero pre-built scrapers in Bright Data's 800+ library).
+- **Collector ID:** `c_mt5qs76z2qeo1prcw6`
+- **CLI Commands Used:**
+  ```bash
+  # 1. Create Scraper
+  bdata scraper create https://www.python.org/jobs/ "job title, company, location, tech stack/category, posting date, listing URL"
+
+  # 2. Run Scraper
+  bdata scraper run c_mt5qs76z2qeo1prcw6 https://www.python.org/jobs/
+
+  # 3. Heal & Approve Scraper
+  bdata scraper heal c_mt5qs76z2qeo1prcw6 "the company field is duplicating the full job title text..."
+  bdata scraper approve c_mt5qs76z2qeo1prcw6
+  ```
+- **Self-Healing Loop & Architecture:** 2 heal attempts executed (8 steps & 12 steps). Supported by a Spring Boot deterministic cleanup fallback (`extractCleanCompany`) to guarantee zero downstream breaking changes.
+- **Documentation & Logs:**
+  - Detailed Healing Narrative: [`scraper/HEALING_LOG.md`](./scraper/HEALING_LOG.md)
+  - Submission & AI Disclosure: [`HACKATHON.md`](./HACKATHON.md)
+  - Sample Output JSON: [`database/sample-scraped-output.json`](./database/sample-scraped-output.json)
 
 ---
 
