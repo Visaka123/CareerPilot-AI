@@ -23,7 +23,7 @@ dist/
 
 # Temporary / Scratch Files
 test.json
-sample-scraped-output.json
+/sample-scraped-output.json
 *.log
 .DS_Store
 Thumbs.db
